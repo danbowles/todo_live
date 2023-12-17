@@ -5,7 +5,7 @@ defmodule TodoLive.Repo.Migrations.CreateTask do
     create table(:task, primary_key: false) do
       add :id, :binary_id, primary_key: true
       add :name, :string
-      add :complate, :boolean, default: false, null: false
+      add :complete, :boolean, default: false, null: false
 
       timestamps(type: :utc_datetime)
     end

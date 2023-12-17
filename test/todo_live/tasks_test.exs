@@ -8,7 +8,7 @@ defmodule TodoLive.TasksTest do
 
     import TodoLive.TasksFixtures
 
-    @invalid_attrs %{complate: nil, name: nil}
+    @invalid_attrs %{complete: nil, name: nil}
 
     test "list_task/0 returns all task" do
       task = task_fixture()
@@ -21,10 +21,10 @@ defmodule TodoLive.TasksTest do
     end
 
     test "create_task/1 with valid data creates a task" do
-      valid_attrs = %{complate: true, name: "some name"}
+      valid_attrs = %{complete: true, name: "some name"}
 
       assert {:ok, %Task{} = task} = Tasks.create_task(valid_attrs)
-      assert task.complate == true
+      assert task.complete == true
       assert task.name == "some name"
     end
 
@@ -34,10 +34,10 @@ defmodule TodoLive.TasksTest do
 
     test "update_task/2 with valid data updates the task" do
       task = task_fixture()
-      update_attrs = %{complate: false, name: "some updated name"}
+      update_attrs = %{complete: false, name: "some updated name"}
 
       assert {:ok, %Task{} = task} = Tasks.update_task(task, update_attrs)
-      assert task.complate == false
+      assert task.complete == false
       assert task.name == "some updated name"
     end
 

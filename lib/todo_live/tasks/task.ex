@@ -5,7 +5,7 @@ defmodule TodoLive.Tasks.Task do
   @primary_key {:id, :binary_id, autogenerate: true}
   @foreign_key_type :binary_id
   schema "task" do
-    field :complate, :boolean, default: false
+    field :complete, :boolean, default: false
     field :name, :string
 
     timestamps(type: :utc_datetime)
@@ -14,8 +14,8 @@ defmodule TodoLive.Tasks.Task do
   @doc false
   def changeset(task, attrs) do
     task
-    |> cast(attrs, [:name, :complate])
-    |> validate_required([:name, :complate])
+    |> cast(attrs, [:name, :complete])
+    |> validate_required([:name, :complete])
     |> unique_constraint(:name)
   end
 end

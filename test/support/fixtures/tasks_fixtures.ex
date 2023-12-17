@@ -16,7 +16,7 @@ defmodule TodoLive.TasksFixtures do
     {:ok, task} =
       attrs
       |> Enum.into(%{
-        complate: true,
+        complete: true,
         name: unique_task_name()
       })
       |> TodoLive.Tasks.create_task()

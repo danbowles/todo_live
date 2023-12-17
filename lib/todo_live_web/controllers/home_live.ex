@@ -1,0 +1,71 @@
+defmodule TodoLiveWeb.HomeLive do
+  use Phoenix.LiveView
+  import TodoLiveWeb.CoreComponents
+
+  @impl Phoenix.LiveView
+  def mount(_params, _session, socket) do
+    default_assigns = %{
+      tasks: TodoLive.Repo.all(TodoLive.Tasks.Task),
+      add_task_form:
+        Phoenix.Component.to_form(TodoLive.Tasks.Task.changeset(%TodoLive.Tasks.Task{}, %{}))
+    }
+
+    {:ok, assign(socket, default_assigns)}
+  end
+
+  defp title(assigns) do
+    ~H"""
+    <div class="flex items-center mb-6">
+      <TodoLiveWeb.CoreComponents.icon
+        name="hero-rectangle-stack-solid"
+        class="h-12 w-12 text-purple-400 stroke-current"
+      />
+
+      <h4 class="font-semibold ml-3 text-2xl">Live Tasks</h4>
+    </div>
+    """
+  end
+
+  @impl Phoenix.LiveView
+  def render(assigns) do
+    ~H"""
+    <div class="flex items-center justify-center w-screen h-screen font-medium">
+      <div class="flex flex-grow items-center justify-center h-full text-gray-600 bg-gray-100">
+        <div class="max-w-full p-8 bg-white rounded-lg shadow-lg w-96">
+          <%= title(assigns) %>
+          <ul>
+            <%= for task <- @tasks do %>
+              <li>Complete: <%= task.complete %>, Name: <%= task.name %></li>
+            <% end %>
+          </ul>
+          <%!-- Add New --%>
+          <div class="flex justify-end">
+            <.button class="flex items-center" phx-click={show_modal("add_task_modal")}>
+              <.icon class="mr-1" name="hero-plus-circle" /> Add New Task
+            </.button>
+          </div>
+          <%!-- End Add New --%>
+        </div>
+      </div>
+      <.modal id="add_task_modal">
+        <h2>What needs doin'?</h2>
+        <.simple_form for={@add_task_form}>
+          <.input field={@add_task_form[:name]} label="Task Name" />
+          <:actions>
+            <.button class="flex items-center mr-1" phx-click={hide_modal("add_task_modal")}>
+              <.icon class="mr-1" name="hero-plus" /> Save
+            </.button>
+            <.button
+              type="reset"
+              class="flex items-center bg-red-900 hover:bg-red-700"
+              phx-click={hide_modal("add_task_modal")}
+            >
+              <.icon class="mr-1" name="hero-x-circle" /> Cancel
+            </.button>
+          </:actions>
+        </.simple_form>
+      </.modal>
+    </div>
+    """
+  end
+end
