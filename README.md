@@ -1,3 +1,7 @@
+# UI
+UI inspiration
+https://codepen.io/robstinson/pen/YzGLMYw?editors=1000
+
 # TodoLive
 
 To start your Phoenix server:
