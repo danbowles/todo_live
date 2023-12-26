@@ -1,6 +1,8 @@
 defmodule TodoLiveWeb.HomeLive do
   use Phoenix.LiveView
   import TodoLiveWeb.CoreComponents
+  alias TodoLive.Repo
+  alias TodoLive.Tasks.Task
 
   @impl Phoenix.LiveView
   def mount(_params, _session, socket) do
@@ -27,6 +29,27 @@ defmodule TodoLiveWeb.HomeLive do
   end
 
   @impl Phoenix.LiveView
+  def handle_event("create_task", %{"task" => params}, socket) do
+    case Repo.insert(Task.changeset(%Task{}, params)) do
+      {:error, message} ->
+        {:noreply, socket |> put_flash(:error, inspect(message))}
+
+      {:ok, _} ->
+        new_assigns = %{
+          tasks: TodoLive.Repo.all(TodoLive.Tasks.Task)
+        }
+
+        socket =
+          socket
+          |> put_flash(:info, "Task created successfully")
+          |> assign(new_assigns)
+          |> push_event("close_modal", %{to: "close_button_add_task_modal"})
+
+        {:noreply, socket}
+    end
+  end
+
+  @impl Phoenix.LiveView
   def render(assigns) do
     ~H"""
     <div class="flex items-center justify-center w-screen h-screen font-medium">
@@ -49,10 +72,10 @@ defmodule TodoLiveWeb.HomeLive do
       </div>
       <.modal id="add_task_modal">
         <h2>What needs doin'?</h2>
-        <.simple_form for={@add_task_form}>
+        <.simple_form for={@add_task_form} phx-submit="create_task">
           <.input field={@add_task_form[:name]} label="Task Name" />
           <:actions>
-            <.button class="flex items-center mr-1" phx-click={hide_modal("add_task_modal")}>
+            <.button class="flex items-center mr-1">
               <.icon class="mr-1" name="hero-plus" /> Save
             </.button>
             <.button
