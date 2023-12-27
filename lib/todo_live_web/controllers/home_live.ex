@@ -56,9 +56,18 @@ defmodule TodoLiveWeb.HomeLive do
       <div class="flex flex-grow items-center justify-center h-full text-gray-600 bg-gray-100">
         <div class="max-w-full p-8 bg-white rounded-lg shadow-lg w-96">
           <%= title(assigns) %>
-          <ul>
+          <ul class="mb-5">
             <%= for task <- @tasks do %>
-              <li>Complete: <%= task.complete %>, Name: <%= task.name %></li>
+              <li>
+                <.input
+                  type="checkbox"
+                  id={task.id}
+                  name={task.name}
+                  checked={task.complete}
+                  label={task.name}
+                  phx-click="toggle_task"
+                />
+              </li>
             <% end %>
           </ul>
           <%!-- Add New --%>
