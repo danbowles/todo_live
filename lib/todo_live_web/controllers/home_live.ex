@@ -2,12 +2,13 @@ defmodule TodoLiveWeb.HomeLive do
   use Phoenix.LiveView
   import TodoLiveWeb.CoreComponents
   alias TodoLive.Repo
+  alias TodoLive.Tasks
   alias TodoLive.Tasks.Task
 
   @impl Phoenix.LiveView
   def mount(_params, _session, socket) do
     default_assigns = %{
-      tasks: TodoLive.Repo.all(TodoLive.Tasks.Task),
+      tasks: Tasks.list_task(),
       add_task_form:
         Phoenix.Component.to_form(TodoLive.Tasks.Task.changeset(%TodoLive.Tasks.Task{}, %{}))
     }
@@ -36,7 +37,7 @@ defmodule TodoLiveWeb.HomeLive do
 
       {:ok, _} ->
         new_assigns = %{
-          tasks: TodoLive.Repo.all(TodoLive.Tasks.Task)
+          tasks: Tasks.list_task(),
         }
 
         socket =
@@ -47,6 +48,14 @@ defmodule TodoLiveWeb.HomeLive do
 
         {:noreply, socket}
     end
+  end
+
+  @impl Phoenix.LiveView
+  def handle_event("toggle_task", %{"id" => id}, socket) do
+    task = Repo.get(Task, id)
+    task |> Tasks.update_task(%{complete: !task.complete})
+    socket = assign(socket, tasks: Tasks.list_task())
+    {:noreply, socket}
   end
 
   @impl Phoenix.LiveView
@@ -66,6 +75,7 @@ defmodule TodoLiveWeb.HomeLive do
                   checked={task.complete}
                   label={task.name}
                   phx-click="toggle_task"
+                  phx-value-id={task.id}
                 />
               </li>
             <% end %>

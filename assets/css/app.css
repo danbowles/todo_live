@@ -3,3 +3,13 @@
 @import "tailwindcss/utilities";
 
 /* This file is for your main application CSS */
+input[type=checkbox]:checked+div span:first-of-type {
+  background-color: #6d28d9;
+  border-color: #6d28d9;
+  color: #fff;
+}
+
+input[type=checkbox]:checked+div span:last-of-type {
+	text-decoration: line-through;
+	color: #9CA3AF;
+}

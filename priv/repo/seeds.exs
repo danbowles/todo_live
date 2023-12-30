@@ -29,5 +29,8 @@ base_todos = [
 
 Enum.each(
   base_todos,
-  &(TodoLive.Tasks.Task.changeset(%TodoLive.Tasks.Task{}, &1) |> TodoLive.Repo.insert!())
+  fn todo ->
+    TodoLive.Tasks.create_task(todo)
+  end
+
 )

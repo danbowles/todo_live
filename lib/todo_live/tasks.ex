@@ -18,7 +18,7 @@ defmodule TodoLive.Tasks do
 
   """
   def list_task do
-    Repo.all(Task)
+    Repo.all(Task |> order_by(asc: :inserted_at))
   end
 
   @doc """
