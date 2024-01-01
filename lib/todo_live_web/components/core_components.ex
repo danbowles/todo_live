@@ -60,13 +60,14 @@ defmodule TodoLiveWeb.CoreComponents do
         tabindex="0"
       >
         <div class="flex min-h-full items-center justify-center">
-          <div class="w-full max-w-3xl p-4 sm:p-6 lg:py-8">
+          <div class="max-w-3xl rounded-lg shadow-lg w-96">
+          <%!-- <div class="w-full max-w-3xl p-4 sm:p-6 lg:py-8"> --%>
             <.focus_wrap
               id={"#{@id}-container"}
               phx-window-keydown={JS.exec("data-cancel", to: "##{@id}")}
               phx-key="escape"
               phx-click-away={JS.exec("data-cancel", to: "##{@id}")}
-              class="shadow-zinc-700/10 ring-zinc-700/10 relative hidden rounded-2xl bg-white p-14 shadow-lg ring-1 transition"
+              class="shadow-zinc-700/10 ring-zinc-700/10 relative hidden rounded-2xl bg-white p-8 shadow-lg transition"
             >
               <div class="absolute top-6 right-5">
                 <button
@@ -74,10 +75,10 @@ defmodule TodoLiveWeb.CoreComponents do
                   phx-hook="ModalCloser"
                   phx-click={JS.exec("data-cancel", to: "##{@id}")}
                   type="button"
-                  class="-m-3 flex-none p-3 opacity-20 hover:opacity-40"
+                  class="-m-3 flex-none p-3 opacity-60 hover:opacity-100"
                   aria-label={gettext("close")}
                 >
-                  <.icon name="hero-x-mark-solid" class="h-5 w-5" />
+                  <.icon name="hero-x-circle" class="h-6 w-6" />
                 </button>
               </div>
               <div id={"#{@id}-content"}>
