@@ -1,5 +1,5 @@
 defmodule TodoLiveWeb.HomeLive do
-  use Phoenix.LiveView
+  use TodoLiveWeb, :live_view
   import TodoLiveWeb.CoreComponents
   alias TodoLive.Repo
   alias TodoLive.Tasks
@@ -10,6 +10,8 @@ defmodule TodoLiveWeb.HomeLive do
     default_assigns = %{
       tasks: Tasks.list_task(),
       add_task_form:
+        Phoenix.Component.to_form(TodoLive.Tasks.Task.changeset(%TodoLive.Tasks.Task{}, %{})),
+      edit_task_form:
         Phoenix.Component.to_form(TodoLive.Tasks.Task.changeset(%TodoLive.Tasks.Task{}, %{}))
     }
 
@@ -67,7 +69,7 @@ defmodule TodoLiveWeb.HomeLive do
           <%= title(assigns) %>
           <ul class="mb-5">
             <%= for task <- @tasks do %>
-              <li>
+              <li class="flex items-center h-10 px-2 rounded hover:bg-gray-100">
                 <.input
                   type="checkbox"
                   id={task.id}
@@ -77,6 +79,9 @@ defmodule TodoLiveWeb.HomeLive do
                   phx-click="toggle_task"
                   phx-value-id={task.id}
                 />
+                <.button class="ml-auto" phx-click={open_edit_modal(task.id)}>
+                  <.icon name="hero-pencil-square-solid" class="mr-2" />
+                </.button>
               </li>
             <% end %>
           </ul>
@@ -107,7 +112,32 @@ defmodule TodoLiveWeb.HomeLive do
           </:actions>
         </.simple_form>
       </.modal>
+      <.modal id="edit_task_modal">
+        <h2>Update task</h2>
+        <.simple_form for={@add_task_form} phx-submit="create_task">
+          <.input field={@add_task_form[:name]} label="Task Name" />
+          <:actions>
+            <.button class="flex items-center mr-1">
+              <.icon class="mr-1" name="hero-plus" /> Save
+            </.button>
+            <.button
+              type="reset"
+              class="flex items-center bg-red-900 hover:bg-red-700"
+              phx-click={hide_modal("edit_task_modal")}
+              small
+            >
+              <.icon class="mr-1" name="hero-x-circle" /> Cancel
+            </.button>
+          </:actions>
+        </.simple_form>
+      </.modal>
     </div>
     """
+  end
+
+  defp open_edit_modal(task_id) do
+    %JS{}
+    |> JS.push("open_edit_modal", value: %{task_id: task_id})
+    |> show_modal("edit_task_modal")
   end
 end
