@@ -32,6 +32,17 @@ defmodule TodoLiveWeb.HomeLive do
   end
 
   @impl Phoenix.LiveView
+  def handle_event("open_edit_modal", %{"task_id" => id}, socket) do
+    task = Enum.find(socket.assigns.tasks, fn task -> task.id == id end)
+
+    new_assigns = %{
+      edit_task_form: Phoenix.Component.to_form(TodoLive.Tasks.Task.edit_changeset(task, %{}))
+    }
+
+    {:noreply, assign(socket, new_assigns)}
+  end
+
+  @impl Phoenix.LiveView
   def handle_event("create_task", %{"task" => params}, socket) do
     case Repo.insert(Task.changeset(%Task{}, params)) do
       {:error, message} ->
@@ -39,7 +50,7 @@ defmodule TodoLiveWeb.HomeLive do
 
       {:ok, _} ->
         new_assigns = %{
-          tasks: Tasks.list_task(),
+          tasks: Tasks.list_task()
         }
 
         socket =
@@ -79,9 +90,10 @@ defmodule TodoLiveWeb.HomeLive do
                   phx-click="toggle_task"
                   phx-value-id={task.id}
                 />
-                <.button class="ml-auto" phx-click={open_edit_modal(task.id)}>
-                  <.icon name="hero-pencil-square-solid" class="mr-2" />
-                </.button>
+                <button class="ml-auto" phx-click={open_edit_modal(task.id, task.name)}>
+                  <span class="hidden">Edit</span>
+                  <span class="hero-pencil-square-solid" />
+                </button>
               </li>
             <% end %>
           </ul>
@@ -114,8 +126,8 @@ defmodule TodoLiveWeb.HomeLive do
       </.modal>
       <.modal id="edit_task_modal">
         <h2>Update task</h2>
-        <.simple_form for={@add_task_form} phx-submit="create_task">
-          <.input field={@add_task_form[:name]} label="Task Name" />
+        <.simple_form for={@edit_task_form} phx-submit="edit_task">
+          <.input field={@edit_task_form[:name]} label="Task Name" />
           <:actions>
             <.button class="flex items-center mr-1">
               <.icon class="mr-1" name="hero-plus" /> Save
@@ -124,7 +136,6 @@ defmodule TodoLiveWeb.HomeLive do
               type="reset"
               class="flex items-center bg-red-900 hover:bg-red-700"
               phx-click={hide_modal("edit_task_modal")}
-              small
             >
               <.icon class="mr-1" name="hero-x-circle" /> Cancel
             </.button>
@@ -135,9 +146,15 @@ defmodule TodoLiveWeb.HomeLive do
     """
   end
 
-  defp open_edit_modal(task_id) do
+  defp open_edit_modal(task_id, task_name) do
     %JS{}
     |> JS.push("open_edit_modal", value: %{task_id: task_id})
+    |> JS.set_attribute({"value", task_name}, to: "#edit_name")
+    |> JS.set_attribute({"value", task_id}, to: "#edit_task_id_input")
+    # |> show_modal_focus_on(
+    #   "edit_modal",
+    #   "close_modal_btn_create_modal"
+    # )
     |> show_modal("edit_task_modal")
   end
 end

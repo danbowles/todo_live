@@ -18,4 +18,11 @@ defmodule TodoLive.Tasks.Task do
     |> validate_required([:name, :complete])
     |> unique_constraint(:name)
   end
+
+  def edit_changeset(task, attrs) do
+    task
+    |> cast(attrs, [:name])
+    |> validate_required([:name])
+    |> unique_constraint(:name)
+  end
 end
