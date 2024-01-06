@@ -32,6 +32,30 @@ defmodule TodoLiveWeb.HomeLive do
   end
 
   @impl Phoenix.LiveView
+  def handle_event("edit_task", %{"task" => %{"id" => id} = attrs}, socket) do
+    task = Enum.find(socket.assigns.tasks, &(&1.id == id))
+
+    case Repo.update(Tasks.Task.edit_changeset(task, attrs)) do
+      {:error, message} ->
+        {:noreply, socket |> put_flash(:error, inspect(message))}
+
+      {:ok, _} ->
+        new_assigns = %{
+          tasks: Tasks.list_task(),
+          edit_task_form:
+            Phoenix.Component.to_form(TodoLive.Tasks.Task.changeset(%TodoLive.Tasks.Task{}, %{}))
+        }
+
+        socket =
+          socket
+          |> assign(new_assigns)
+          |> push_event("close_modal", %{to: "#close_modal_btn_edit_modal"})
+
+        {:noreply, socket}
+    end
+  end
+
+  @impl Phoenix.LiveView
   def handle_event("open_edit_modal", %{"task_id" => id}, socket) do
     task = Enum.find(socket.assigns.tasks, fn task -> task.id == id end)
 
@@ -76,6 +100,12 @@ defmodule TodoLiveWeb.HomeLive do
     ~H"""
     <div class="flex items-center justify-center w-screen h-screen font-medium">
       <div class="flex flex-grow items-center justify-center h-full text-gray-600 bg-gray-100">
+        <div>
+          <span>Show:</span>
+          <a href="#" class="ml-2 text-blue-500">All</a>
+          <a href="#" class="ml-2 text-blue-500">Active</a>
+          <a href="#" class="ml-2 text-blue-500">Completed</a>
+        </div>
         <div class="max-w-full p-8 bg-white rounded-lg shadow-lg w-96">
           <%= title(assigns) %>
           <ul class="mb-5">
@@ -127,6 +157,7 @@ defmodule TodoLiveWeb.HomeLive do
       <.modal id="edit_task_modal">
         <h2>Update task</h2>
         <.simple_form for={@edit_task_form} phx-submit="edit_task">
+          <%= Phoenix.HTML.Form.hidden_input(@edit_task_form, :id, id: "edit_task_id_input") %>
           <.input field={@edit_task_form[:name]} label="Task Name" />
           <:actions>
             <.button class="flex items-center mr-1">
@@ -151,10 +182,9 @@ defmodule TodoLiveWeb.HomeLive do
     |> JS.push("open_edit_modal", value: %{task_id: task_id})
     |> JS.set_attribute({"value", task_name}, to: "#edit_name")
     |> JS.set_attribute({"value", task_id}, to: "#edit_task_id_input")
-    # |> show_modal_focus_on(
-    #   "edit_modal",
-    #   "close_modal_btn_create_modal"
-    # )
-    |> show_modal("edit_task_modal")
+    |> show_modal_focus_on(
+      "edit_task_modal",
+      "close_modal_btn_create_modal"
+    )
   end
 end

@@ -1,12 +1,16 @@
----
+version: "3.8"
+
 services:
   postgres:
-    image: postgres:14-alpine
-    container_name: postgres_14_todo_live
+    image: postgres:latest
+    restart: always
     ports:
-      - "5432:5432"
-    volumes:
-      - ./volumes/postgres-data:/var/lib/postgresql/data
+      - "5432:5432"   # Exposes internal port 5432 to host port 5432
     environment:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+volumes:
+  postgres_data:
