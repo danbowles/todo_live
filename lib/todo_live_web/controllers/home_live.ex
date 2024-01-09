@@ -6,9 +6,21 @@ defmodule TodoLiveWeb.HomeLive do
   alias TodoLive.Tasks.Task
 
   @impl Phoenix.LiveView
-  def handle_params(params, _uri, socket) do
-    IO.inspect(params)
-    {:noreply, socket}
+  def handle_params(params, _url, socket) do
+    tasks = Tasks.list_task()
+
+    case params["show"] do
+      "complete" ->
+        completed_tasks = Enum.filter(tasks, &(&1.complete == true))
+        {:noreply, assign(socket, tasks: completed_tasks)}
+
+      "active" ->
+        active_tasks = Enum.filter(tasks, &(&1.complete == false))
+        {:noreply, assign(socket, tasks: active_tasks)}
+
+      _ ->
+        {:noreply, assign(socket, tasks: tasks)}
+    end
   end
 
   @impl Phoenix.LiveView
@@ -22,19 +34,6 @@ defmodule TodoLiveWeb.HomeLive do
     }
 
     {:ok, assign(socket, default_assigns)}
-  end
-
-  defp title(assigns) do
-    ~H"""
-    <div class="flex items-center mb-6">
-      <TodoLiveWeb.CoreComponents.icon
-        name="hero-rectangle-stack-solid"
-        class="h-12 w-12 text-purple-400 stroke-current"
-      />
-
-      <h4 class="font-semibold ml-3 text-2xl">Live Tasks</h4>
-    </div>
-    """
   end
 
   @impl Phoenix.LiveView
@@ -99,88 +98,6 @@ defmodule TodoLiveWeb.HomeLive do
     task |> Tasks.update_task(%{complete: !task.complete})
     socket = assign(socket, tasks: Tasks.list_task())
     {:noreply, socket}
-  end
-
-  @impl Phoenix.LiveView
-  def render(assigns) do
-    ~H"""
-    <div class="flex items-center justify-center w-screen h-screen font-medium">
-      <div class="flex flex-grow items-center justify-center h-full text-gray-600 bg-gray-100">
-        <div>
-          <span>Show:</span>
-          <.link patch={~p"/?#{[show: "all"]}"}>All</.link>
-          <.link patch={~p"/?#{[show: "complate"]}"}>Complete</.link>
-          <.link patch={~p"/?#{[show: "active"]}"}>Active</.link>
-        </div>
-        <div class="max-w-full p-8 bg-white rounded-lg shadow-lg w-96">
-          <%= title(assigns) %>
-          <ul class="mb-5">
-            <%= for task <- @tasks do %>
-              <li class="flex items-center h-10 px-2 rounded hover:bg-gray-100">
-                <.input
-                  type="checkbox"
-                  id={task.id}
-                  name={task.name}
-                  checked={task.complete}
-                  label={task.name}
-                  phx-click="toggle_task"
-                  phx-value-id={task.id}
-                />
-                <button class="ml-auto" phx-click={open_edit_modal(task.id, task.name)}>
-                  <span class="hidden">Edit</span>
-                  <span class="hero-pencil-square-solid" />
-                </button>
-              </li>
-            <% end %>
-          </ul>
-          <%!-- Add New --%>
-          <div class="flex justify-end">
-            <.button class="flex items-center" phx-click={show_modal("add_task_modal")}>
-              <.icon class="mr-1" name="hero-plus-circle" /> Add New Task
-            </.button>
-          </div>
-          <%!-- End Add New --%>
-        </div>
-      </div>
-      <.modal id="add_task_modal">
-        <h2>What needs doin'?</h2>
-        <.simple_form for={@add_task_form} phx-submit="create_task">
-          <.input field={@add_task_form[:name]} label="Task Name" />
-          <:actions>
-            <.button class="flex items-center mr-1">
-              <.icon class="mr-1" name="hero-plus" /> Save
-            </.button>
-            <.button
-              type="reset"
-              class="flex items-center bg-red-900 hover:bg-red-700"
-              phx-click={hide_modal("add_task_modal")}
-            >
-              <.icon class="mr-1" name="hero-x-circle" /> Cancel
-            </.button>
-          </:actions>
-        </.simple_form>
-      </.modal>
-      <.modal id="edit_task_modal">
-        <h2>Update task</h2>
-        <.simple_form for={@edit_task_form} phx-submit="edit_task">
-          <%= Phoenix.HTML.Form.hidden_input(@edit_task_form, :id, id: "edit_task_id_input") %>
-          <.input field={@edit_task_form[:name]} label="Task Name" />
-          <:actions>
-            <.button class="flex items-center mr-1">
-              <.icon class="mr-1" name="hero-plus" /> Save
-            </.button>
-            <.button
-              type="reset"
-              class="flex items-center bg-red-900 hover:bg-red-700"
-              phx-click={hide_modal("edit_task_modal")}
-            >
-              <.icon class="mr-1" name="hero-x-circle" /> Cancel
-            </.button>
-          </:actions>
-        </.simple_form>
-      </.modal>
-    </div>
-    """
   end
 
   defp open_edit_modal(task_id, task_name) do
