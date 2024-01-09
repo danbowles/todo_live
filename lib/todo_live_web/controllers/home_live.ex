@@ -6,6 +6,12 @@ defmodule TodoLiveWeb.HomeLive do
   alias TodoLive.Tasks.Task
 
   @impl Phoenix.LiveView
+  def handle_params(params, _uri, socket) do
+    IO.inspect(params)
+    {:noreply, socket}
+  end
+
+  @impl Phoenix.LiveView
   def mount(_params, _session, socket) do
     default_assigns = %{
       tasks: Tasks.list_task(),
@@ -102,9 +108,9 @@ defmodule TodoLiveWeb.HomeLive do
       <div class="flex flex-grow items-center justify-center h-full text-gray-600 bg-gray-100">
         <div>
           <span>Show:</span>
-          <a href="#" class="ml-2 text-blue-500">All</a>
-          <a href="#" class="ml-2 text-blue-500">Active</a>
-          <a href="#" class="ml-2 text-blue-500">Completed</a>
+          <.link patch={~p"/?#{[show: "all"]}"}>All</.link>
+          <.link patch={~p"/?#{[show: "complate"]}"}>Complete</.link>
+          <.link patch={~p"/?#{[show: "active"]}"}>Active</.link>
         </div>
         <div class="max-w-full p-8 bg-white rounded-lg shadow-lg w-96">
           <%= title(assigns) %>
